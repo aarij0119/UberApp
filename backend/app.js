@@ -2,9 +2,11 @@ import express from 'express';
 import DataBase from './db/db.js'
 import dotnv from 'dotenv';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import { configDotenv } from 'dotenv';
 const app = express();
 DataBase()
-
+configDotenv()
 //routes
 import userRoute from './routes/userroute.js'
 
@@ -15,6 +17,7 @@ app.use(cors({
     methods: 'Post,Get',
     credentials:true
 }));
+app.use(cookieParser());
 
 
 
