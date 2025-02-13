@@ -1,6 +1,7 @@
 import UserModel from '../models/usermodel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import TokenModel from '../models/blaclistedModelToken.js';
 
 const UserRegister = async (req, res) => {
     // Destructuring
@@ -29,7 +30,7 @@ const UserRegister = async (req, res) => {
 
         // Save the user to the database
         const createdUser = await newUser.save();
-        const token = jwt.sign({ email: createdUser.email, id: createdUser._id }, process.env.USER_SECRET_KEY);
+        const token = jwt.sign({ email: createdUser.email, id: createdUser._id }, process.env.USER_SECRET_KEY,{expiresIn:'24h'});
         res.cookie('token', token)
         // Respond with success message
         res.status(201).json({ message: "User created successfully!", createdUser });
@@ -58,7 +59,7 @@ const login = async (req, res) => {
             // Generate JWT token
             const token = jwt.sign(
                 { email: user.email, id: user._id },
-                process.env.USER_SECRET_KEY
+                process.env.USER_SECRET_KEY, {expiresIn:'24h'}
             );
 
             // Set cookie
@@ -71,14 +72,26 @@ const login = async (req, res) => {
     }
 };
 
-const logout = (req, res) => {
+
+const logout = async (req, res) => {
     try {
-        res.cookie('token', "");
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(400).json({ message: "No token found" });
+        }
+        
+        await TokenModel.create({ token });
+
+        res.cookie('token', "",);
+
         return res.status(200).json({ message: "Logout successfully" });
     } catch (err) {
-      return  res.status(500).json({message:"Failde to logout", err})
+        return res.status(500).json({ message: "Failed to logout", error: err.message });
     }
 }
+
+
+
 
 export { login, logout }
 export default UserRegister;
