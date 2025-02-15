@@ -23,7 +23,6 @@ const isloggedin = async (req, res) => {
         if (error) {
             return res.status(401).json({ message: "Not verified" });
         }
-        return res.status(400).json({ message: "Bad request" });
     }
 }
 

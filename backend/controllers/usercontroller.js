@@ -19,12 +19,12 @@ const UserRegister = async (req, res) => {
         const hash = await bcrypt.hash(password, salt);
 
         // Create the new user
-        const newUser = new UserModel({
+        const newUser =  new UserModel({
             fullname: {
                 firstname: fullname.firstname,
                 lastname: fullname.lastname
             },
-            email,
+            email:email,
             password: hash
         });
 

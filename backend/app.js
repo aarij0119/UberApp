@@ -9,6 +9,7 @@ DataBase()
 configDotenv()
 //routes
 import userRoute from './routes/userroute.js'
+import captainRoute from './routes/captainroute.js'
 
 dotnv.config();
 app.use(express.json());
@@ -25,7 +26,9 @@ app.get('/', (req, res) => {
     res.send("It's working on port 3000");
 });
 
-app.use('/users', userRoute)
+app.use('/users', userRoute);
+app.use('/captains', captainRoute)
+
 
 let Port = 3000
 app.listen(Port, (err) => {
