@@ -38,6 +38,7 @@ const captainRegister = async (req, res) => {
     }
 }
 
+//login function
 const captainlogin = async (req, res) => {
     const { email, password } = req.body;
     const cptfind = await captainModel.findOne({ email });
@@ -58,6 +59,7 @@ const captainlogin = async (req, res) => {
     }
 };
 
+//logout function
 const captainlogout = (req, res) => {
     try {
         const token = req.cookies.token
