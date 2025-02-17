@@ -9,7 +9,7 @@ const UserLogin = () => {
                 <Logo />
             </div>
             <div>
-                <form className='flex flex-col gap-4 mb-8'>
+                <form className='flex flex-col gap-4 mb-6'>
                     <div >
                         <label className='block  mb-2 font-bold text-base'>What's your email</label>
                         <input
