@@ -1,8 +1,46 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Logo from '../Components/Logo'
 import { Link } from 'react-router-dom'
 
 const CaptainLogin = () => {
+  const [formdata, setformdata] = useState({
+    email: '',
+    password: ''
+  });
+  const [formerror, setformerror] = useState({
+    email: '',
+    password: ''
+  });
+  const changehandler = (e) => {
+    const { name, value } = e.target;
+    setformdata({ ...formdata, [name]: value })
+  }
+  const validator = () => {
+    const errors = {};
+    const emailregex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordregex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    if (!formdata.email || formdata.email === null) {
+      errors.email = "Email can't be empty"
+    }else if(!emailregex.test(formdata.email)){
+      errors.email = "Please enter a valid email"
+    }
+
+    if (!formdata.password || formdata.password === null) {
+      errors.password = "Password can't be empty"
+    }else if(!passwordregex.test(formdata.password)){
+      errors.password = "Please enter special character and capital letter,number"
+    }
+    return errors
+  }
+  const submithandler = (e) => {
+    e.preventDefault();
+    const errors = validator();
+    setformerror(errors)
+    if (Object.keys(errors).length === 0) {
+      console.log("submitted");
+      console.log(formdata)
+    }
+  }
   return (
 
     <div className='p-4'>
@@ -10,28 +48,32 @@ const CaptainLogin = () => {
         <Logo />
       </div>
       <div>
-        <form className='flex flex-col gap-4 mb-6'>
+        <form onSubmit={submithandler} className='flex flex-col gap-4 mb-6'>
           <div >
             <label className='block  mb-2 font-bold text-base'>What's your email</label>
+            <span className='text-red-800 font-bold'>{formerror.email}</span>
             <input
               className='bg-gray-200 p-4 w-full'
-              type='email'
-              required
               placeholder='example@gmail.com'
+              value={formdata.email}
+              onChange={changehandler}
+              name='email'
             />
           </div>
           <div>
             <label className='block mb-2 font-bold text-base'>Enter Password</label>
+            <span className='text-red-800 font-bold'>{formerror.password}</span>
             <input
               className='bg-gray-200 p-4 w-full'
               type='password'
-              required
               placeholder='password'
+              value={formdata.password}
+              onChange={changehandler}
+              name='password'
             />
           </div>
+          <button className='bg-black text-white p-2 w-full rounded text-lg font-semibold' type='submit'>Login</button>
         </form>
-
-        <button className='bg-black text-white p-2 w-full rounded text-lg font-semibold' type='submit'>Login</button>
 
         <Link to={"/captain-signup"} className='mt-2 text-blue-500 text-blue flex items-center justify-center'>Join a fleet? Register as a captain</Link>
 

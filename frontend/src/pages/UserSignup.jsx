@@ -22,7 +22,7 @@ const UserSignup = () => {
         const emailregex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
         const passwordregex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
 
-        if (!formdata.firstname) {
+        if (!formdata.firstname || formdata.firstname == null) {
             errors.firstname = "Firstname can't be empty";
         }
         else if (Number(formdata.firstname)) {
@@ -54,6 +54,12 @@ const UserSignup = () => {
         const error = validator();
         if (Object.keys(error).length === 0) {
             console.log(formdata)
+            setformdata({
+                firstname: '',
+                lastname: '',
+                email: '',
+                password: ''
+            })
         } else {
             setformerror(error)
         }
