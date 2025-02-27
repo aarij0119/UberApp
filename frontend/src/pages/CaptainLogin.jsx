@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import Logo from '../Components/Logo'
 import { Link } from 'react-router-dom'
+import { FaRegEye } from "react-icons/fa";
+import { FaRegEyeSlash } from "react-icons/fa";
 
 const CaptainLogin = () => {
   const [formdata, setformdata] = useState({
@@ -11,6 +13,11 @@ const CaptainLogin = () => {
     email: '',
     password: ''
   });
+  const[hide,sethide] = useState(false);
+  const hidehandler = () => {
+    sethide((prev) => !prev);
+  }
+  console.log(hide)
   const changehandler = (e) => {
     const { name, value } = e.target;
     setformdata({ ...formdata, [name]: value })
@@ -53,7 +60,7 @@ const CaptainLogin = () => {
             <label className='block  mb-2 font-bold text-base'>What's your email</label>
             <span className='text-red-800 font-bold'>{formerror.email}</span>
             <input
-              className='bg-gray-200 p-4 w-full'
+              className='bg-gray-200 p-4 w-full rounded'
               placeholder='example@gmail.com'
               value={formdata.email}
               onChange={changehandler}
@@ -63,14 +70,19 @@ const CaptainLogin = () => {
           <div>
             <label className='block mb-2 font-bold text-base'>Enter Password</label>
             <span className='text-red-800 font-bold'>{formerror.password}</span>
+            <div className='flex items-center'>
             <input
-              className='bg-gray-200 p-4 w-full'
-              type='password'
+              className='bg-gray-200 p-4 w-full outline-none rounded-l'
+              type={hide ? 'text' : 'password'}
               placeholder='password'
               value={formdata.password}
               onChange={changehandler}
               name='password'
             />
+            <h4 onClick={hidehandler} className='p-4 bg-gray-200 rounded-r'>
+              {hide ? <FaRegEye size={24}/> : <FaRegEyeSlash size={24}/>}
+            </h4>
+            </div>
           </div>
           <button className='bg-black text-white p-2 w-full rounded text-lg font-semibold' type='submit'>Login</button>
         </form>

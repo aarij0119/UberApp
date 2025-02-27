@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Logo from '../Components/Logo'
+import { FaRegEye } from "react-icons/fa";
+import { FaRegEyeSlash } from "react-icons/fa";
 
 const CaptainSignup = () => {
   const [formdata, setformdata] = useState({
@@ -22,7 +24,12 @@ const CaptainSignup = () => {
     vehicleplate: '',
     vehiclenumber: '',
     vehicletype: ''
-  })
+  });
+  const [hide,sethide] = useState(false);
+  const showhandler = () => {
+    sethide((prev)=> !prev)
+  }
+  
 
   function validator() {
     const errors = {};
@@ -138,14 +145,17 @@ const CaptainSignup = () => {
           <div>
             <label className='block mb-2 font-bold text-base'>Enter Password</label>
             <span className='text-red-800 font-bold'>{formerrors.password}</span>
-            <input
-              className='bg-gray-200 p-4 w-full focus:outline-yellow-800 rounded'
-              type='text'
+           <div className='flex items-center'>
+           <input
+              className='bg-gray-200 p-4 w-full outline-none rounded-l'
+              type={hide ? 'text' : 'password'}
               placeholder='password'
               onChange={changehandler}
               value={formdata.password}
               name='password'
             />
+            <h4 onClick={showhandler} className='p-4 rounded-r bg-gray-200'>{hide ? <FaRegEye size={24}/> : <FaRegEyeSlash size={24}/>}</h4>
+           </div>
           </div>
           <label className='block  font-bold text-base'>vehicle information</label>
           <div className='grid grid-cols-2 gap-2'>
