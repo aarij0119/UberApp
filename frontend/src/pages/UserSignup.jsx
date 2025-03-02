@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Logo from '../Components/Logo'
 import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
-
+import axios from 'axios';
 const UserSignup = () => {
+    const navigate = useNavigate();
     const [formdata, setformdata] = useState({
         firstname: '',
         lastname: '',
@@ -14,8 +15,9 @@ const UserSignup = () => {
     const [formmerror, setformerror] = useState({
         firstname: '',
         email: '',
-        password: ''
+        password: '',
     });
+    const[apians,setapians] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const validator = () => {
         const errors = {};
@@ -49,21 +51,34 @@ const UserSignup = () => {
         }
         return errors
     }
-    const submithandler = (e) => {
+    const submithandler = async (e) => {
         e.preventDefault();
         const error = validator();
         if (Object.keys(error).length === 0) {
-            console.log(formdata)
-            setformdata({
-                firstname: '',
-                lastname: '',
-                email: '',
-                password: ''
-            })
+            console.log("Form data:", formdata);
+            try {
+                const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, formdata);
+                console.log(response)
+                if(response.status === 201){
+                    navigate('/home')
+                }
+                // const data = response.data;
+                // console.log(`data is ${data}`);
+                setformdata({
+                    firstname: '',
+                    lastname: '',
+                    email: '',
+                    password: ''
+                });
+            } catch (err) {
+                // console.log("Error:", err.response.data.message);
+                const apiresponse = err.response.data.message;
+                setapians(apiresponse)
+                
+            }
         } else {
-            setformerror(error)
+            setformerror(error);
         }
-
     }
     const changehandler = (e) => {
         const { name, value } = e.target
@@ -72,6 +87,7 @@ const UserSignup = () => {
     const showpassword = () => {
         setShowPassword((prev) => !prev);
     }
+    
     return (
 
         <div className='p-4'>
@@ -120,9 +136,9 @@ const UserSignup = () => {
                     <div>
                         <label className='block mb-2 font-bold text-base'>Enter Password</label>
                         <h4 className='text-red-600 text-md font-bold mb-2'>{formmerror.password}</h4>
-                        <div className='flex items-center justify-center w-full bg-gray-200 rounded-r'>
+                        <div className='flex items-center justify-center w-full bg-gray-200 rounded-r rounded-l'>
                             <input
-                                className='p-4 bg-gray-200 w-[100%] outline-none rounded'
+                                className='p-4 bg-gray-200 w-[100%] outline-none rounded-l '
                                 type={showPassword ? 'text' : 'password'}
                                 placeholder='password'
                                 name='password'
@@ -139,6 +155,7 @@ const UserSignup = () => {
                     </div>
                     <button className='bg-black text-white p-2 w-full rounded text-lg font-semibold mt-3' type='submit'>Register</button>
                 </form>
+                <h4 className='text-red-600 text-md font-bold mb-2'>{apians}</h4>
                 <Link to={"/login"} className='mt-2 text-blue-500 text-blue flex items-center justify-center'>Alreday have account? Login</Link>
 
                 <Link to={'/captain-signup'} className='bg-green-700 block text-center text-white p-2 mx-auto rounded text-lg font-semibold absolute bottom-8 left-0 right-0 w-[94%]' type='submit'>Sign up as a Captain</Link>
