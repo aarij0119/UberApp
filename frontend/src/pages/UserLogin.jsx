@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import Logo from '../Components/Logo';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
+import axios from 'axios';
+import { UserContextData } from '../Context/UserContext';
 
 const UserLogin = () => {
+    const navigate = useNavigate();
+    const { setuserdata } = useContext(UserContextData);
     const [formdata, setformdata] = useState({
         email: '',
         password: ''
     });
     const [hide, sethide] = useState(false);
+    const[apiresponseerr,setapiresponseerr] = useState('');
     const [formerrors, setformerrors] = useState({
         email: '',
         password: ''
     });
-
+    
     const changehandler = (e) => {
         const { name, value } = e.target;
         setformdata({ ...formdata, [name]: value });
@@ -42,17 +47,29 @@ const UserLogin = () => {
     const showhandler = () => {
         sethide((prev) => !prev)
     }
-    const submithandler = (e) => {
+    const submithandler = async (e) => {
         e.preventDefault();
         const errors = validator();
         setformerrors(errors);
         if (Object.keys(errors).length === 0) {
-            console.log("submitted");
-            console.log(formdata)
-            setformdata({
-                email: '',
-                password: ''
-            });
+            try {
+                const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`, formdata,{
+                    withCredentials:true
+                });
+                if (response.status === 200) {
+                    const data = response.data;
+                    localStorage.setItem('token', data.token);
+                    setuserdata(data);
+                    navigate('/home');
+                }
+                setformdata({
+                    email: '',
+                    password: ''
+                });
+            } catch (error) {
+                const apiresponseerr = error.response.data.message;
+                setapiresponseerr(apiresponseerr);
+            }
         }
     };
     return (
@@ -89,7 +106,8 @@ const UserLogin = () => {
                             <span onClick={showhandler} className='bg-gray-200 p-2.5 rounded-r'>{hide ? <FaRegEye size={20} /> : <FaRegEyeSlash size={20} />}</span>
                         </div>
                     </div>
-                    <button className='bg-black text-white p-2 w-full rounded text-lg font-semibold outline-none border-0' type='submit'>
+                    <span className='font-bold text-red-500'>{apiresponseerr}</span>
+                    <button type='submit' className='bg-black text-white p-2 w-full rounded text-lg font-semibold outline-none border-0'>
                         Login
                     </button>
                 </form>

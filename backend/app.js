@@ -15,7 +15,8 @@ dotnv.config();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
-    methods: 'Post,Get',
+    origin:'http://localhost:5173',
+    methods: 'POST,GET',
     credentials:true
 }));
 app.use(cookieParser());

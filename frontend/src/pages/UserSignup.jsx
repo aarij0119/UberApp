@@ -1,10 +1,12 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Logo from '../Components/Logo'
 import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
 import axios from 'axios';
+import { UserContextData } from '../Context/UserContext';
 const UserSignup = () => {
+   const{setuserdata} = useContext(UserContextData);
     const navigate = useNavigate();
     const [formdata, setformdata] = useState({
         firstname: '',
@@ -55,15 +57,16 @@ const UserSignup = () => {
         e.preventDefault();
         const error = validator();
         if (Object.keys(error).length === 0) {
-            console.log("Form data:", formdata);
             try {
-                const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, formdata);
-                console.log(response)
+                const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, formdata,{
+                    withCredentials:true
+                });
                 if(response.status === 201){
+                    const data = response.data
+                    localStorage.setItem('token',data.token)
+                    setuserdata(data.createdUser)
                     navigate('/home')
                 }
-                // const data = response.data;
-                // console.log(`data is ${data}`);
                 setformdata({
                     firstname: '',
                     lastname: '',
@@ -71,7 +74,6 @@ const UserSignup = () => {
                     password: ''
                 });
             } catch (err) {
-                // console.log("Error:", err.response.data.message);
                 const apiresponse = err.response.data.message;
                 setapians(apiresponse)
                 

@@ -5,8 +5,6 @@ import TokenModel from '../models/blaclistedModelToken.js';
 
 const UserRegister = async (req, res) => {
     // Destructuring
-    console.log("Body is this",req.body);
-    console.log(req.body)
     const { firstname,lastname, email, password } = req.body;
 
     // Check if user with same email exists
@@ -21,7 +19,7 @@ const UserRegister = async (req, res) => {
         const hash = await bcrypt.hash(password, salt);
 
         // Create the new user
-        const newUser =  new UserModel({
+        const newUser = await UserModel.create({
             fullname: {
                 firstname: firstname,
                 lastname: lastname
@@ -35,7 +33,7 @@ const UserRegister = async (req, res) => {
         const token = jwt.sign({ email: createdUser.email, id: createdUser._id }, process.env.USER_SECRET_KEY,{expiresIn:'24h'});
         res.cookie('token', token)
         // Respond with success message
-        res.status(201).json({ message: "User created successfully!", createdUser });
+        res.status(201).json({ message: "User created successfully!", createdUser,token });
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: "Failed to create user", error });
@@ -68,7 +66,7 @@ const login = async (req, res) => {
             // Set cookie
             res.cookie('token', token);
 
-            res.status(200).json({ message: "Login successful" });
+            res.status(200).json({ message: "Login successful",User:user,token:token});
         });
     } catch (err) {
         res.status(500).json({ message: "Failed to log in", error: err });
