@@ -6,37 +6,42 @@ import captainModel from '../models/captainModel.js';
 
 //Captain Register Function
 const captainRegister = async (req, res) => {
-    const { fullname, email, password, vehicle, plate, capacity, vehicleType } = req.body;
-    const captainfind = await CaptainModel.findOne({ email: email });
-    if (captainfind) {
-        return res.status(400).json({ message: "captain already exist" });
-    }
-    // console.log(req.body)
+    const { firstname, lastname, email, password, vehiclecolor, vehiclenumber, vehiclecapacity, vehicleType } = req.body;
+    
     try {
+        const captainfind = await CaptainModel.findOne({ email: email });
+        if (captainfind) {
+            return res.status(400).json({ message: "Captain already exists" });
+        }
+
         const salt = await Bcrypt.genSalt(10);
         const hash = await Bcrypt.hash(password, salt);
+
         const captain = await CaptainModel.create({
             fullname: {
-                firstname: fullname.firstname,
-                lastname: fullname.lastname
+                firstname: firstname,
+                lastname: lastname
             },
             email: email,
             password: hash,
             vehicle: {
-                color: vehicle.color
+                color: vehiclecolor
             },
-            plate: plate,
-            capacity: capacity,
-            vehicleType: vehicleType,
+            platenumber: vehiclenumber,
+            capacity: vehiclecapacity,
+            vehicleType: vehicleType, 
         });
+
         const createdcaptain = await captain.save();
         const token = jwt.sign({ email: createdcaptain.email, id: createdcaptain._id }, process.env.CAPTAIN_SECRET_KEY);
-        res.cookie('token', token)
-        res.status(200).json({ message: "User Created successfully", createdcaptain })
+        res.cookie('token', token);
+        res.status(200).json({ message: "User Created successfully", createdcaptain:createdcaptain,token:token });
     } catch (error) {
-        res.status(400).json({ error: error, message: "Bad request ", })
+        console.error("Error creating captain:", error);  // Log error for server-side debugging
+        res.status(400).json({ error: error, message: "Bad request" });
     }
 }
+
 
 //login function
 const captainlogin = async (req, res) => {
@@ -53,7 +58,7 @@ const captainlogin = async (req, res) => {
         }
         const token = jwt.sign({ email: cptfind.id, id: cptfind._id }, process.env.CAPTAIN_SECRET_KEY);
         res.cookie("token", token);
-        return res.status(201).json({ message: "Captain logged in successfully" });
+        return res.status(201).json({ message: "Captain logged in successfully", captain:cptfind,token:token });
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }

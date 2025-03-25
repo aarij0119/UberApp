@@ -34,7 +34,7 @@ const captainSchema =  mongoose.Schema({
             required:true
         }
     },
-    plate:{
+    platenumber:{
         type:String,
         required:true
     },

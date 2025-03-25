@@ -1,23 +1,32 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import Logo from '../Components/Logo'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
+import axios from 'axios';
+import { CaptainDataContext } from '../Context/CaptainContext';
 
 const CaptainLogin = () => {
+  const navigate = useNavigate();
+  const{setCaptainData}  = useContext(CaptainDataContext);
+
   const [formdata, setformdata] = useState({
     email: '',
     password: ''
   });
+
   const [formerror, setformerror] = useState({
     email: '',
     password: ''
   });
-  const[hide,sethide] = useState(false);
+
+  const [hide, sethide] = useState(false);
+
+  const [apiError,setapiError] = useState('');
+
   const hidehandler = () => {
     sethide((prev) => !prev);
   }
-  console.log(hide)
   const changehandler = (e) => {
     const { name, value } = e.target;
     setformdata({ ...formdata, [name]: value })
@@ -28,24 +37,37 @@ const CaptainLogin = () => {
     const passwordregex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
     if (!formdata.email || formdata.email === null) {
       errors.email = "Email can't be empty"
-    }else if(!emailregex.test(formdata.email)){
+    } else if (!emailregex.test(formdata.email)) {
       errors.email = "Please enter a valid email"
     }
 
     if (!formdata.password || formdata.password === null) {
       errors.password = "Password can't be empty"
-    }else if(!passwordregex.test(formdata.password)){
+    } else if (!passwordregex.test(formdata.password)) {
       errors.password = "Please enter special character and capital letter,number"
     }
     return errors
   }
-  const submithandler = (e) => {
+  const submithandler = async (e) => {
     e.preventDefault();
     const errors = validator();
     setformerror(errors)
     if (Object.keys(errors).length === 0) {
-      console.log("submitted");
-      console.log(formdata)
+      try {
+        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/login`, formdata, {
+          withCredentials: true
+        });
+        if(response.status === 201){
+          const data = response.data
+          const token = data.token
+          localStorage.setItem('captaintoken',token);
+          setCaptainData(data);
+          navigate('/captain-home')
+        }
+      } catch (error) {
+        const apierror = error.response.data.message
+        setapiError(apierror);
+      }
     }
   }
   return (
@@ -56,8 +78,8 @@ const CaptainLogin = () => {
       </div>
       <div>
         <form onSubmit={submithandler} className='flex flex-col gap-4 mb-6'>
-          <div >
-            <label className='block  mb-2 font-bold text-base'>What's your email</label>
+          <div>
+            <label className='block mb-2 font-bold text-base'>What's your email</label>
             <span className='text-red-800 font-bold'>{formerror.email}</span>
             <input
               className='bg-gray-200 p-4 w-full rounded'
@@ -71,21 +93,23 @@ const CaptainLogin = () => {
             <label className='block mb-2 font-bold text-base'>Enter Password</label>
             <span className='text-red-800 font-bold'>{formerror.password}</span>
             <div className='flex items-center'>
-            <input
-              className='bg-gray-200 p-4 w-full outline-none rounded-l'
-              type={hide ? 'text' : 'password'}
-              placeholder='password'
-              value={formdata.password}
-              onChange={changehandler}
-              name='password'
-            />
-            <h4 onClick={hidehandler} className='p-4 bg-gray-200 rounded-r'>
-              {hide ? <FaRegEye size={24}/> : <FaRegEyeSlash size={24}/>}
-            </h4>
+              <input
+                className='bg-gray-200 p-4 w-full outline-none rounded-l'
+                type={hide ? 'text' : 'password'}
+                placeholder='password'
+                value={formdata.password}
+                onChange={changehandler}
+                name='password'
+              />
+              <button type="button" onClick={hidehandler} className='p-4 bg-gray-200 rounded-r'>
+                {hide ? <FaRegEye size={24} /> : <FaRegEyeSlash size={24} />}
+              </button>
             </div>
           </div>
+          <span className='text-red-800 font-bold'>{apiError}</span>
           <button className='bg-black text-white p-2 w-full rounded text-lg font-semibold' type='submit'>Login</button>
         </form>
+
 
         <Link to={"/captain-signup"} className='mt-2 text-blue-500 text-blue flex items-center justify-center'>Join a fleet? Register as a captain</Link>
 

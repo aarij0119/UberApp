@@ -7,7 +7,7 @@ const UserContext = ({ children }) => {
         userfirstname:'',
         userlastname:''
     });
-    console.log("User data is this ",userdata)
+    // console.log("User data is this ",userdata)
     return (
         <UserContextData.Provider value={{userdata,setuserdata}}>
             {children}
