@@ -9,7 +9,6 @@ const LocationSearchPanel = ({setVehiclepanel,setpanleopen}) => {
     "Sector 26, Bapu Dham Colony, Chandigarh"
   ];
   return (
-    // [#eeeeeebe]
     <div className=' w-full flex flex-col gap-3'>
       {locations.map((location,key)=>{
        return <div onClick={()=>{ setVehiclepanel(true),setpanleopen(false)}} key={key} className='bg-[#eeeeeebe] p-4 flex items-center gap-2 rounded'>
