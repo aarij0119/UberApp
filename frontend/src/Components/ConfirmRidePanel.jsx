@@ -3,7 +3,7 @@ import { FaHouseChimneyUser } from "react-icons/fa6";
 import { FaLocationDot } from "react-icons/fa6";
 import { BsCashCoin } from "react-icons/bs";
 import { FaIndianRupeeSign } from "react-icons/fa6";
-const ConfirmRidePanel = () => {
+const ConfirmRidePanel = ({setDriverFoundPanel,setVehicleRidePanel}) => {
   return (
     <div>
         <div className='flex flex-col gap-3 mb-4'>
@@ -35,7 +35,7 @@ const ConfirmRidePanel = () => {
               </div>
             </div>
           </div>
-          <button className='bg-green-700 w-full p-2 text-xl font-semibold text-white rounded-xl'>Confirm</button>
+          <button onClick={()=>{setDriverFoundPanel(true), setVehicleRidePanel(false)}} className='bg-green-700 w-full p-2 text-xl font-semibold text-white rounded-xl'>Confirm</button>
     </div>
   )
 }

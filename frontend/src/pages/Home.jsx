@@ -4,11 +4,12 @@ import { IoIosArrowDown } from "react-icons/io";
 import gsap from "gsap";
 
 
-//Icons
+//Components
 import LocationSearchPanel from '../Components/LocationSearchPanel';
 import VehiclePanel from '../Components/VehiclePanel';
 import ConfirmRidePanel from '../Components/ConfirmRidePanel';
-
+import LookingForDriver from '../Components/LookingForDriver';
+import WaitingForDriver from '../Components/WaitingForDriver';
 
 const Home = () => {
   const [picklocation, setpiclocation] = useState('');
@@ -16,12 +17,15 @@ const Home = () => {
   const [ispanelopen, setpanleopen] = useState(false);
   const [vehiclepanel, setVehiclepanel] = useState(false);
   const [VehicleRidePanel, setVehicleRidePanel] = useState(false);
+  const [DriverFoundPanel, setDriverFoundPanel] = useState(false);
+  const [WaitingDriverPanel, setWaitingPanel] = useState(false);
   const panelref = useRef(null);
   const panelclose = useRef(null);
   const RidePanelRef = useRef(null);
   const choosevehiclepanel = useRef(null);
   const arrowref = useRef(null);
-
+  const DriverFoundRef = useRef(null);
+  const WaitingDriverPanelRef = useRef(null);
   const submitHandler = (e) => {
     e.preventDefault();
   }
@@ -63,6 +67,7 @@ const Home = () => {
       })
     }
   }, [vehiclepanel])
+
   useGSAP(function () {
     if (VehicleRidePanel) {
       gsap.to(RidePanelRef.current, {
@@ -74,6 +79,29 @@ const Home = () => {
       })
     }
   }, [VehicleRidePanel])
+
+  useGSAP(function () {
+    if (DriverFoundPanel) {
+      gsap.to(DriverFoundRef.current, {
+        y: 0
+      })
+    } else {
+      gsap.to(DriverFoundRef.current, {
+        y: '100%'
+      })
+    }
+  }, [DriverFoundPanel])
+  useGSAP(function () {
+    if (WaitingDriverPanel) {
+      gsap.to(WaitingDriverPanelRef.current, {
+        y: 0
+      })
+    } else {
+      gsap.to(WaitingDriverPanelRef.current, {
+        y: '100%'
+      })
+    }
+  }, [WaitingDriverPanel])
 
   return (
     <div className='w-full h-screen'>
@@ -124,7 +152,7 @@ const Home = () => {
         <div ref={panelref} className='w-full h-[70%] bg-white px-3 overflow-y-auto'>
           <LocationSearchPanel setpanleopen={setpanleopen} setVehiclepanel={setVehiclepanel} />
         </div>
-        
+
         {/*vehiclePanel*/}
         <div ref={choosevehiclepanel} className='fixed bottom-0 w-full bg-white p-4 translate-y-full'>
           <div className='flex items-center justify-between mb-4'>
@@ -143,7 +171,29 @@ const Home = () => {
           <div className='mb-2'>
             <img className='w-3/5 mx-auto' src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_254,w_450/v1688398971/assets/29/fbb8b0-75b1-4e2a-8533-3a364e7042fa/original/UberSelect-White.png" alt="" />
           </div>
-          <ConfirmRidePanel/>
+          <ConfirmRidePanel setDriverFoundPanel={setDriverFoundPanel} setVehicleRidePanel={setVehicleRidePanel} />
+        </div>
+
+        {/* LookingForDriver Panel */}
+        <div ref={DriverFoundRef} className='fixed bottom-0 bg-white w-full p-4 transform translate-y-full'>
+          <h2 className='text-2xl font-bold text-center'>Looking For driver</h2>
+          <div className='mb-2'>
+            <img className='w-3/5 mx-auto' src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_254,w_450/v1688398971/assets/29/fbb8b0-75b1-4e2a-8533-3a364e7042fa/original/UberSelect-White.png" alt="" />
+          </div>
+          <LookingForDriver />
+        </div>
+
+        {/* WaitingForDriver Panel */}
+        <div ref={WaitingDriverPanelRef }  className='fixed bottom-0 bg-white w-full p-4 transform translate-y-full'>
+          <div className='mb-2 flex justify-between'>
+            <img className='w-28' src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_254,w_450/v1688398971/assets/29/fbb8b0-75b1-4e2a-8533-3a364e7042fa/original/UberSelect-White.png" alt="" />
+            <div className='text-right'>
+              <h1 className='text-xl font-bold -mb-1'>Muhammad</h1>
+              <h2 className='text-xl font-bold -mb-1 -mt-1'>CH 0 1 BL 2213</h2>
+              <h3 className='text-base'>Maruti Suzuki, Alto</h3>
+            </div>
+          </div>
+          <WaitingForDriver />
         </div>
       </div>
     </div>
