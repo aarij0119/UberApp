@@ -105,7 +105,7 @@ const Home = () => {
 
   return (
     <div className='w-full h-screen'>
-      <div className='absolute p-3 text-3xl font-bold'>Uber</div>
+       <img className='w-20 object-cover fixed top-4 left-3' src='https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png' />
       <div className='w-full h-full'>
         <img className='h-full w-full object-cover' src="https://cdn.dribbble.com/userupload/22910073/file/original-f308c35778d329518ef2b88f866111ec.gif" alt="" />
       </div>
