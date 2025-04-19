@@ -4,6 +4,8 @@ import dotnv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { configDotenv } from 'dotenv';
+import { ExpressValidator } from 'express-validator';
+import mapsRoute from './routes/mapsroute.js'
 const app = express();
 DataBase()
 configDotenv()
@@ -28,7 +30,8 @@ app.get('/', (req, res) => {
 });
 
 app.use('/users', userRoute);
-app.use('/captains', captainRoute)
+app.use('/captains', captainRoute);
+app.use('/maps', mapsRoute)
 
 
 let Port = 3000

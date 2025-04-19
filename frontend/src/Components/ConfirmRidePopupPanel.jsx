@@ -9,7 +9,7 @@ const ConfirmRidePopupPanel = ({setConfirmPanel}) => {
     return (
         <div>
             <div className='flex flex-col gap-2 mb-3'>
-                <h1 className='text-2xl font-bold mb-2 pt-2'>Confirm this ride to start</h1>
+                <h1 className='text-2xl font-bold mb-2'>Confirm this ride to start</h1>
                 <div className='flex justify-between p-2 bg-yellow-400 rounded-xl px-4'>
                     <div className='flex items-center gap-3'>
                         <img className='w-16 rounded-full' src="https://unavatar.io/github/1stevengrant" alt="" />
@@ -47,8 +47,16 @@ const ConfirmRidePopupPanel = ({setConfirmPanel}) => {
                     </div>
                 </div>
             </div>
-            <Link to={'/captain-riding'} className='bg-green-700 w-full inline-block mb-4 p-2 text-xl text-center rounded-xl font-semibold text-white'>Confirm</Link>
-            <button onClick={()=>{setConfirmPanel(false)}} className='bg-red-500 text-white w-full p-2 text-xl font-semibold  rounded-xl mb-3'>Cancel</button>
+           <form>
+            <input
+            type='text'
+            required
+            className='w-full p-3 mb-3 text-lg font-bold bg-gray-300 rounded-md placeholder:text-xl focus:outline-yellow-500'
+            placeholder='Enter OTP'
+            />
+           <Link to={'/captain-riding'} className='bg-green-700 w-full inline-block mb-2 p-3 text-xl text-center rounded-xl font-semibold text-white'>Confirm</Link>
+           <button onClick={()=>{setConfirmPanel(false)}} className='bg-red-500 text-white w-full p-3 text-xl font-semibold  rounded-xl mb-3'>Cancel</button>
+           </form>
         </div>
     )
 }
