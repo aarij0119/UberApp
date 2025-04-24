@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
-import "leaflet/dist/leaflet.css"; // Import Leaflet CSS for proper rendering
+import "leaflet/dist/leaflet.css";
 
 const LiveTracking = () => {
   const [location, setLocation] = useState(null);

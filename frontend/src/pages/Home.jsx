@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react'
 import { useGSAP } from '@gsap/react';
 import { IoIosArrowDown } from "react-icons/io";
 import gsap from "gsap";
+import axios from 'axios'
 
 
 //Components
@@ -14,6 +15,7 @@ import WaitingForDriver from '../Components/WaitingForDriver';
 const Home = () => {
   const [picklocation, setpiclocation] = useState('');
   const [destination, setdestination] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
   const [ispanelopen, setpanleopen] = useState(false);
   const [vehiclepanel, setVehiclepanel] = useState(false);
   const [VehicleRidePanel, setVehicleRidePanel] = useState(false);
@@ -26,10 +28,63 @@ const Home = () => {
   const arrowref = useRef(null);
   const DriverFoundRef = useRef(null);
   const WaitingDriverPanelRef = useRef(null);
-  const submitHandler = (e) => {
-    e.preventDefault();
-  }
 
+
+   let timeout = null;
+   const debounce = (callback, delay) => {
+     clearTimeout(timeout);
+     timeout = setTimeout(callback, delay);
+   };
+
+     const fetchSuggestions = async (query, type) => {
+      if (!query) {
+        setSuggestions((prevSuggestions) => ({
+          ...prevSuggestions,
+          [type]: [],
+        }));
+        return;
+      }
+    
+      try {
+        const response = await axios.get(
+          `https://graphhopper.com/api/1/geocode?q=${encodeURIComponent(query)}&key=${import.meta.env.VITE_API_KEY}`
+        );
+        const results = response.data.hits.map((hit) => hit.name);
+    
+        setSuggestions((prevSuggestions) => ({
+          ...prevSuggestions,
+          [type]: results,
+        }));
+      } catch (error) {
+        console.error('Error fetching suggestions:', error);
+      }
+    };
+    
+    const handlePickupChange = (e) => {
+      const query = e.target.value;
+      setpiclocation(query);
+    
+      setSuggestions((prevSuggestions) => ({
+        ...prevSuggestions,
+        destination: [],
+      }));
+    
+      debounce(() => fetchSuggestions(query, 'pickup'), 300);
+    };
+    
+    const handleDestinationChange = (e) => {
+      const query = e.target.value;
+      setdestination(query);
+    
+      setSuggestions((prevSuggestions) => ({
+        ...prevSuggestions,
+        pickup: [],
+      }));
+    
+      debounce(() => fetchSuggestions(query, 'destination'), 300);
+    };
+    
+  
   useGSAP(function () {
     if (ispanelopen) {
       gsap.to(panelref.current, {
@@ -49,7 +104,6 @@ const Home = () => {
       })
     }
   }, [ispanelopen]);
-
   useGSAP(function () {
     if (vehiclepanel) {
       gsap.to(choosevehiclepanel.current, {
@@ -67,7 +121,6 @@ const Home = () => {
       })
     }
   }, [vehiclepanel])
-
   useGSAP(function () {
     if (VehicleRidePanel) {
       gsap.to(RidePanelRef.current, {
@@ -79,7 +132,6 @@ const Home = () => {
       })
     }
   }, [VehicleRidePanel])
-
   useGSAP(function () {
     if (DriverFoundPanel) {
       gsap.to(DriverFoundRef.current, {
@@ -105,7 +157,7 @@ const Home = () => {
 
   return (
     <div className='w-full h-screen'>
-       <img className='w-20 object-cover fixed top-4 left-3' src='https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png' />
+      <img className='w-20 object-cover fixed top-4 left-3' src='https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png' />
       <div className='w-full h-full'>
         <img className='h-full w-full object-cover' src="https://cdn.dribbble.com/userupload/22910073/file/original-f308c35778d329518ef2b88f866111ec.gif" alt="" />
       </div>
@@ -117,14 +169,12 @@ const Home = () => {
               setpanleopen(false)
             }} ref={panelclose} className='opacity-0 mt-3' size={22} />
           </div>
-          <form onSubmit={submitHandler}>
+          <form>
             <input
               className='w-full outline-[#000] p-3 rounded-lg text-lg font-semibold bg-[#eee] mb-5'
               placeholder='Add a pick up location'
               value={picklocation}
-              onChange={(e) => {
-                setpiclocation(e.target.value)
-              }}
+              onChange={handlePickupChange}
               onClick={() => {
                 setpanleopen(true)
               }}
@@ -136,9 +186,7 @@ const Home = () => {
               className='w-full outline-[#000] p-3 rounded-lg text-lg font-semibold bg-[#eee]'
               placeholder='Enter your destination'
               value={destination}
-              onChange={(e) => {
-                setdestination(e.target.value)
-              }}
+              onChange={handleDestinationChange}
               onClick={() => {
                 setpanleopen(true)
               }}
@@ -150,7 +198,7 @@ const Home = () => {
         </div>
 
         <div ref={panelref} className='w-full h-[70%] bg-white px-3 overflow-y-auto'>
-          <LocationSearchPanel setpanleopen={setpanleopen} setVehiclepanel={setVehiclepanel} />
+          <LocationSearchPanel setpanleopen={setpanleopen} setVehiclepanel={setVehiclepanel} suggestions={suggestions}/>
         </div>
 
         {/*vehiclePanel*/}
@@ -184,7 +232,7 @@ const Home = () => {
         </div>
 
         {/* WaitingForDriver Panel */}
-        <div ref={WaitingDriverPanelRef }  className='fixed bottom-0 bg-white w-full p-4 transform translate-y-full'>
+        <div ref={WaitingDriverPanelRef} className='fixed bottom-0 bg-white w-full p-4 transform translate-y-full'>
           <div className='mb-2 flex justify-between'>
             <img className='w-28' src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_254,w_450/v1688398971/assets/29/fbb8b0-75b1-4e2a-8533-3a364e7042fa/original/UberSelect-White.png" alt="" />
             <div className='text-right'>
