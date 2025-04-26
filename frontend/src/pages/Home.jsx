@@ -21,6 +21,9 @@ const Home = () => {
   const [VehicleRidePanel, setVehicleRidePanel] = useState(false);
   const [DriverFoundPanel, setDriverFoundPanel] = useState(false);
   const [WaitingDriverPanel, setWaitingPanel] = useState(false);
+  const [fare, setfare] = useState('')
+  const [Ispick, setIspic] = useState(true);
+  const [Isdest, setdest] = useState(false);
   const panelref = useRef(null);
   const panelclose = useRef(null);
   const RidePanelRef = useRef(null);
@@ -30,61 +33,64 @@ const Home = () => {
   const WaitingDriverPanelRef = useRef(null);
 
 
-   let timeout = null;
-   const debounce = (callback, delay) => {
-     clearTimeout(timeout);
-     timeout = setTimeout(callback, delay);
-   };
+  let timeout = null;
+  const debounce = (callback, delay) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(callback, delay);
+  };
 
-     const fetchSuggestions = async (query, type) => {
-      if (!query) {
-        setSuggestions((prevSuggestions) => ({
-          ...prevSuggestions,
-          [type]: [],
-        }));
-        return;
-      }
-    
-      try {
-        const response = await axios.get(
-          `https://graphhopper.com/api/1/geocode?q=${encodeURIComponent(query)}&key=${import.meta.env.VITE_API_KEY}`
-        );
-        const results = response.data.hits.map((hit) => hit.name);
-    
-        setSuggestions((prevSuggestions) => ({
-          ...prevSuggestions,
-          [type]: results,
-        }));
-      } catch (error) {
-        console.error('Error fetching suggestions:', error);
-      }
-    };
-    
-    const handlePickupChange = (e) => {
-      const query = e.target.value;
-      setpiclocation(query);
-    
+  const fetchSuggestions = async (query, type) => {
+    if (!query) {
       setSuggestions((prevSuggestions) => ({
         ...prevSuggestions,
-        destination: [],
+        [type]: [],
       }));
-    
-      debounce(() => fetchSuggestions(query, 'pickup'), 300);
-    };
-    
-    const handleDestinationChange = (e) => {
-      const query = e.target.value;
-      setdestination(query);
-    
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `https://graphhopper.com/api/1/geocode?q=${encodeURIComponent(query)}&key=${import.meta.env.VITE_API_KEY}`
+      );
+      const results = response.data.hits.map((hit) => hit.name);
+
       setSuggestions((prevSuggestions) => ({
         ...prevSuggestions,
-        pickup: [],
+        [type]: results,
       }));
-    
-      debounce(() => fetchSuggestions(query, 'destination'), 300);
-    };
-    
-  
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+    }
+  };
+
+  const handlePickupChange = (e) => {
+    const query = e.target.value;
+    setpiclocation(query);
+    setIspic(true);
+    setdest(false);
+    setSuggestions((prevSuggestions) => ({
+      ...prevSuggestions,
+      destination: [],
+    }));
+
+    debounce(() => fetchSuggestions(query, "pickup"), 300);
+  };
+
+  const handleDestinationChange = (e) => {
+    const query = e.target.value;
+    setdestination(query); // Update destination state
+    setdest(true); // Set context to destination
+    setIspic(false); // Clear pickup context
+    setSuggestions((prevSuggestions) => ({
+      ...prevSuggestions,
+      pickup: [], // Clear pickup suggestions
+    }));
+
+    debounce(() => fetchSuggestions(query, "destination"), 300);
+  };
+
+
+
   useGSAP(function () {
     if (ispanelopen) {
       gsap.to(panelref.current, {
@@ -154,7 +160,23 @@ const Home = () => {
       })
     }
   }, [WaitingDriverPanel])
-
+  
+  async function findtrip() {
+    setpiclocation('');
+    setdestination('');
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/getfare`, {
+      params: { picklocation, destination },
+      withCredentials: true,
+      headers: {
+        Authorization: `${localStorage.getItem('token')}`
+      }
+    })
+    const data =  response.data;
+    setfare(data);
+    setpanleopen(false);
+    setVehiclepanel(true);
+    
+  }
   return (
     <div className='w-full h-screen'>
       <img className='w-20 object-cover fixed top-4 left-3' src='https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png' />
@@ -162,7 +184,7 @@ const Home = () => {
         <img className='h-full w-full object-cover' src="https://cdn.dribbble.com/userupload/22910073/file/original-f308c35778d329518ef2b88f866111ec.gif" alt="" />
       </div>
       <div className='flex flex-col justify-end absolute bottom-0 w-full h-full'>
-        <div className='w-full h-[30%] bg-white px-3 '>
+        <div className='w-full h-[40%] bg-white px-3 '>
           <div className='mb-4 flex items-center justify-between'>
             <h4 className='text-2xl font-bold mt-3'>Find a trip</h4>
             <IoIosArrowDown onClick={() => {
@@ -171,34 +193,40 @@ const Home = () => {
           </div>
           <form>
             <input
-              className='w-full outline-[#000] p-3 rounded-lg text-lg font-semibold bg-[#eee] mb-5'
-              placeholder='Add a pick up location'
+              className="w-full outline-[#000] p-3 rounded-lg text-lg font-semibold bg-[#eee] mb-5"
+              placeholder="Add a pickup location"
               value={picklocation}
               onChange={handlePickupChange}
               onClick={() => {
-                setpanleopen(true)
+                setSuggestions({}); // Clear previous suggestions
+                setpanleopen(true); // Open suggestions panel
               }}
               type="text"
               name="pickup"
+              autoComplete='off'
               required
-              id="" />
+            />
             <input
-              className='w-full outline-[#000] p-3 rounded-lg text-lg font-semibold bg-[#eee]'
-              placeholder='Enter your destination'
+              className="w-full outline-[#000] p-3 rounded-lg text-lg font-semibold bg-[#eee]"
+              placeholder="Enter your destination"
               value={destination}
               onChange={handleDestinationChange}
               onClick={() => {
-                setpanleopen(true)
+                setSuggestions({}); // Clear previous suggestions
+                setpanleopen(true); // Open suggestions panel
               }}
               type="text"
               name="destination"
+              autoComplete='off'
               required
-              id="" />
+            />
           </form>
+          <button onClick={findtrip} type='button' className='text-white bg-black w-full p-2 text-lg rounded-2xl mt-3'>Find Trip</button>
         </div>
 
-        <div ref={panelref} className='w-full h-[70%] bg-white px-3 overflow-y-auto'>
-          <LocationSearchPanel setpanleopen={setpanleopen} setVehiclepanel={setVehiclepanel} suggestions={suggestions}/>
+        <div ref={panelref} className='w-full h-[60%] bg-white px-3 overflow-y-auto'>
+          <LocationSearchPanel setpiclocation={setpiclocation} setdestination={setdestination} setpanleopen={setpanleopen} setVehiclepanel={setVehiclepanel} suggestions={suggestions} picklocation={picklocation} destination={destination}
+            Ispick={Ispick} Isdest={Isdest} />
         </div>
 
         {/*vehiclePanel*/}
@@ -207,7 +235,7 @@ const Home = () => {
             <h2 className='text-2xl font-bold'>Choose a vehicle Type</h2>
             <IoIosArrowDown className='opacity-0' onClick={() => { setVehiclepanel(false) }} ref={arrowref} size={22} />
           </div>
-          <VehiclePanel setVehicleRidePanel={setVehicleRidePanel} setVehiclepanel={setVehiclepanel} />
+          <VehiclePanel fare={fare} setVehicleRidePanel={setVehicleRidePanel} setVehiclepanel={setVehiclepanel} />
         </div>
 
         {/* ConfirmRidePanle */}

@@ -50,7 +50,6 @@ const captainlogin = async (req, res) => {
     if (!cptfind) {
         return res.status(400).json({ message: "user not found" });
     }
-    // console.log(cptfind)
     try {
         const isPasswordCorrect = await Bcrypt.compare(password, cptfind.password);
         if (!isPasswordCorrect) {

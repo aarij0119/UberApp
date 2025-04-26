@@ -1,7 +1,7 @@
 import React from 'react'
 import { FaRupeeSign } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
-const VehiclePanel = ({ setVehicleRidePanel,setVehiclepanel }) => {
+const VehiclePanel = ({ setVehicleRidePanel,setVehiclepanel,fare }) => {
     return (
         <div>
             {/* Car  */}
@@ -15,7 +15,7 @@ const VehiclePanel = ({ setVehicleRidePanel,setVehiclepanel }) => {
                     <h4 className='text-sm'>Affordable, compact rides</h4>
                 </div>
                 <div>
-                    <h1 className='text-xl font-bold flex items-center pr-2'><FaRupeeSign />193.22</h1>
+                    <h1 className='text-xl font-bold flex items-center'><FaRupeeSign />{fare?.car}</h1>
                 </div>
             </div>
 
@@ -30,7 +30,7 @@ const VehiclePanel = ({ setVehicleRidePanel,setVehiclepanel }) => {
                     <h4 className='text-sm'>Affordable, Motorcycle rides</h4>
                 </div>
                 <div>
-                    <h1 className='text-xl font-bold flex items-center pr-2'><FaRupeeSign />65</h1>
+                    <h1 className='text-xl font-bold flex items-center'><FaRupeeSign />{fare?.bike}</h1>
                 </div>
             </div>
 
@@ -45,7 +45,7 @@ const VehiclePanel = ({ setVehicleRidePanel,setVehiclepanel }) => {
                     <h4 className='text-sm'>Affordable, Auto rides</h4>
                 </div>
                 <div>
-                    <h1 className='text-xl font-bold flex items-center pr-2'><FaRupeeSign />118.98</h1>
+                    <h1 className='text-xl font-bold flex items-center'><FaRupeeSign />{fare?.auto}</h1>
                 </div>
             </div>
         </div>

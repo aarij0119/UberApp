@@ -12,6 +12,7 @@ configDotenv()
 //routes
 import userRoute from './routes/userroute.js'
 import captainRoute from './routes/captainroute.js'
+import rideRoute from './routes/rideroute.js'
 
 dotnv.config();
 app.use(express.json());
@@ -31,7 +32,8 @@ app.get('/', (req, res) => {
 
 app.use('/users', userRoute);
 app.use('/captains', captainRoute);
-app.use('/maps', mapsRoute)
+app.use('/maps', mapsRoute);
+app.use('/rides',rideRoute)
 
 
 let Port = 3000

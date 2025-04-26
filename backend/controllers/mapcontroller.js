@@ -1,17 +1,13 @@
-import mapservice, { getDistanceAndTime } from '../services/mapservice.js';
 import axios from "axios";
-const apiKey = "43d53085-28c9-463d-86d5-33589b7c9638"; // GraphHopper API Key
+import validateAddress from '../services/mapservice.js'
 
 const getCoordinates = async (req, res, next) => {
   const { address } = req.query
-  // console.log(address)
   try {
     if (!address) {
       throw new Error('Address parameter is missing or invalid');
     }
-    // Pass both address and key to the mapservice function
-    const coordinates = await mapservice(address);
-
+    const coordinates = await validateAddress(address);
     res.status(200).json(coordinates);
   } catch (error) {
     console.error('Error fetching coordinates:', error.message);
@@ -20,44 +16,61 @@ const getCoordinates = async (req, res, next) => {
 };
 
 const getDistanceTime = async (req, res) => {
-  console.log("Received Query:", req.query);
   const { origin, destination } = req.query;
 
   if (!origin || !destination) {
     return res.status(400).json({ error: "Origin and destination are required" });
   }
 
+  if (!process.env.API_KEY) {
+    return res.status(500).json({ error: "API key is missing" });
+  }
+
   try {
-    // Convert origin to latitude & longitude using GraphHopper Geocoding API
-    const originResponse = await axios.get(
-      `https://graphhopper.com/api/1/geocode?q=${encodeURIComponent(origin)}&key=${apiKey}`
-    );
-    const destinationResponse = await axios.get(
-      `https://graphhopper.com/api/1/geocode?q=${encodeURIComponent(destination)}&key=${apiKey}`
+    // Fetch coordinates for origin and destination
+    const getCoordinates = async (location) => {
+      const response = await axios.get(
+        `https://graphhopper.com/api/1/geocode?q=${encodeURIComponent(location)}&key=${process.env.API_KEY}`
+      );
+      if (!response.data.hits.length) {
+        throw new Error(`Location not found: ${location}`);
+      }
+      return response.data.hits[0].point; // { lat, lng }
+    };
+
+    const originCoords = await getCoordinates(origin);
+    const destinationCoords = await getCoordinates(destination);
+
+    // Fetch route information
+    const routingResponse = await axios.get(
+      `https://graphhopper.com/api/1/route?point=${originCoords.lat},${originCoords.lng}&point=${destinationCoords.lat},${destinationCoords.lng}&vehicle=car&key=${process.env.API_KEY}`
     );
 
-    if (originResponse.data.hits.length === 0 || destinationResponse.data.hits.length === 0) {
-      throw new Error("One or both locations not found");
+    if (!routingResponse.data.paths || routingResponse.data.paths.length === 0) {
+      return res.status(404).json({ error: "No route found between the given locations" });
     }
 
-    const originCoords = originResponse.data.hits[0].point; // { lat, lng }
-    const destinationCoords = destinationResponse.data.hits[0].point; // { lat, lng }
-    // console.log(originCoords, destinationCoords)
-    // Call GraphHopper's Routing API with converted lat/lon
-    const finddata = await getDistanceAndTime({
-      origin: { lat: originCoords.lat, lng: originCoords.lng },
-      destination: { lat: destinationCoords.lat, lng: destinationCoords.lng }
-    });
-    return res.status(200).json(finddata);
+    const routeData = routingResponse.data.paths[0];
+    const distanceKm = routeData.distance / 1000;
+    const estimatedTimeMinutes = routeData.time / 60000;
 
+    return res.status(200).json({
+      distance: distanceKm,
+      estimatedTime: estimatedTimeMinutes
+    });
   } catch (err) {
     console.error("Error fetching coordinates or route:", err.message);
-    return res.status(500).json({ message: `Error: ${err.message}` });
+    return res.status(500).json({ error: err.message });
   }
 };
 
 
 
-export { getDistanceTime }
-export default getCoordinates;
+
+
+
+
+
+    export { getDistanceTime }
+    export default getCoordinates;
 
