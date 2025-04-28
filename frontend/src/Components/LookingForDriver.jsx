@@ -3,7 +3,7 @@ import { FaHouseChimneyUser } from "react-icons/fa6";
 import { FaLocationDot } from "react-icons/fa6";
 import { BsCashCoin } from "react-icons/bs";
 import { FaIndianRupeeSign } from "react-icons/fa6";
-const LookingForDriver = () => {
+const LookingForDriver = ({origin ,destination ,fare, vehicleType}) => {
     return (
         <div>
             <div className='flex flex-col gap-3 mb-4'>
@@ -13,7 +13,7 @@ const LookingForDriver = () => {
                     </div>
                     <div>
                         <h2 className='text-2xl font-bold'>562/11-A</h2>
-                        <h4 className='text-gray-700 font-semibold'>Sector 13 Manimajra, Chandigarh</h4>
+                        <h4 className='text-gray-700 font-semibold'>{origin}</h4>
                     </div>
                 </div>
                 <div className='flex items-center gap-5 p-4 border-b-[0.1px]'>
@@ -22,7 +22,7 @@ const LookingForDriver = () => {
                     </div>
                     <div>
                         <h2 className='text-2xl font-bold'>562/11-A</h2>
-                        <h4 className='text-gray-700 font-semibold'>Sector 13 Manimajra, Chandigarh</h4>
+                        <h4 className='text-gray-700 font-semibold'>{destination}</h4>
                     </div>
                 </div>
                 <div className='flex items-center gap-5 p-4'>
@@ -30,7 +30,7 @@ const LookingForDriver = () => {
                         <BsCashCoin size={22} />
                     </div>
                     <div>
-                        <h2 className='text-2xl font-bold flex items-center'><FaIndianRupeeSign size={20} />193.86</h2>
+                        <h2 className='text-2xl font-bold flex items-center'><FaIndianRupeeSign size={20} />{fare[vehicleType]}</h2>
                         <h4 className='text-gray-700 font-semibold'>Cash Cash</h4>
                     </div>
                 </div>

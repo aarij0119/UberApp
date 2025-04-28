@@ -1,9 +1,12 @@
-import React, { useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useGSAP } from '@gsap/react';
 import { IoIosArrowDown } from "react-icons/io";
 import gsap from "gsap";
 import axios from 'axios'
 
+//Context
+import {SocketContext} from '../Context/SocketContext'
+import { UserContextData } from '../Context/UserContext';
 
 //Components
 import LocationSearchPanel from '../Components/LocationSearchPanel';
@@ -13,7 +16,7 @@ import LookingForDriver from '../Components/LookingForDriver';
 import WaitingForDriver from '../Components/WaitingForDriver';
 
 const Home = () => {
-  const [picklocation, setpiclocation] = useState('');
+  const [origin, setpiclocation] = useState('');
   const [destination, setdestination] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [ispanelopen, setpanleopen] = useState(false);
@@ -21,6 +24,7 @@ const Home = () => {
   const [VehicleRidePanel, setVehicleRidePanel] = useState(false);
   const [DriverFoundPanel, setDriverFoundPanel] = useState(false);
   const [WaitingDriverPanel, setWaitingPanel] = useState(false);
+  const [vehicleType, setvehicleType] = useState('')
   const [fare, setfare] = useState('')
   const [Ispick, setIspic] = useState(true);
   const [Isdest, setdest] = useState(false);
@@ -32,7 +36,16 @@ const Home = () => {
   const DriverFoundRef = useRef(null);
   const WaitingDriverPanelRef = useRef(null);
 
+  
+const  {socket}= useContext(SocketContext);
+const {userId} = useContext(UserContextData)
 
+useEffect(()=>{
+  if(userId){
+    // console.log("got userdat",userId)
+  }
+  socket.emit('join',{userType:'user',userId:userId})
+})
   let timeout = null;
   const debounce = (callback, delay) => {
     clearTimeout(timeout);
@@ -78,12 +91,12 @@ const Home = () => {
 
   const handleDestinationChange = (e) => {
     const query = e.target.value;
-    setdestination(query); // Update destination state
-    setdest(true); // Set context to destination
-    setIspic(false); // Clear pickup context
+    setdestination(query);
+    setdest(true);
+    setIspic(false);
     setSuggestions((prevSuggestions) => ({
       ...prevSuggestions,
-      pickup: [], // Clear pickup suggestions
+      pickup: [],
     }));
 
     debounce(() => fetchSuggestions(query, "destination"), 300);
@@ -160,22 +173,39 @@ const Home = () => {
       })
     }
   }, [WaitingDriverPanel])
-  
+
   async function findtrip() {
-    setpiclocation('');
-    setdestination('');
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/getfare`, {
-      params: { picklocation, destination },
+      params: { origin, destination },
       withCredentials: true,
       headers: {
         Authorization: `${localStorage.getItem('token')}`
       }
     })
-    const data =  response.data;
+    const data = response.data;
     setfare(data);
+    // setpiclocation('');
+    // setdestination('');
     setpanleopen(false);
     setVehiclepanel(true);
+
+  }
+
+  async function createride() {
+   const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create`, {
+      origin,
+      destination,
+      vehicleType
+    },
     
+      {
+        withCredentials:true,
+        Authorization: `${localStorage.getItem('token')}`
+      }
+
+
+    )
+    console.log(response)
   }
   return (
     <div className='w-full h-screen'>
@@ -195,11 +225,11 @@ const Home = () => {
             <input
               className="w-full outline-[#000] p-3 rounded-lg text-lg font-semibold bg-[#eee] mb-5"
               placeholder="Add a pickup location"
-              value={picklocation}
+              value={origin}
               onChange={handlePickupChange}
               onClick={() => {
-                setSuggestions({}); // Clear previous suggestions
-                setpanleopen(true); // Open suggestions panel
+                setSuggestions({});
+                setpanleopen(true);
               }}
               type="text"
               name="pickup"
@@ -212,8 +242,8 @@ const Home = () => {
               value={destination}
               onChange={handleDestinationChange}
               onClick={() => {
-                setSuggestions({}); // Clear previous suggestions
-                setpanleopen(true); // Open suggestions panel
+                setSuggestions({});
+                setpanleopen(true);
               }}
               type="text"
               name="destination"
@@ -221,11 +251,11 @@ const Home = () => {
               required
             />
           </form>
-          <button onClick={findtrip} type='button' className='text-white bg-black w-full p-2 text-lg rounded-2xl mt-3'>Find Trip</button>
+          <button onClick={findtrip} className='text-white bg-black w-full p-2 text-lg rounded-2xl mt-3'>Find Trip</button>
         </div>
 
         <div ref={panelref} className='w-full h-[60%] bg-white px-3 overflow-y-auto'>
-          <LocationSearchPanel setpiclocation={setpiclocation} setdestination={setdestination} setpanleopen={setpanleopen} setVehiclepanel={setVehiclepanel} suggestions={suggestions} picklocation={picklocation} destination={destination}
+          <LocationSearchPanel setpiclocation={setpiclocation} setdestination={setdestination} suggestions={suggestions} picklocation={origin} destination={destination}
             Ispick={Ispick} Isdest={Isdest} />
         </div>
 
@@ -235,7 +265,7 @@ const Home = () => {
             <h2 className='text-2xl font-bold'>Choose a vehicle Type</h2>
             <IoIosArrowDown className='opacity-0' onClick={() => { setVehiclepanel(false) }} ref={arrowref} size={22} />
           </div>
-          <VehiclePanel fare={fare} setVehicleRidePanel={setVehicleRidePanel} setVehiclepanel={setVehiclepanel} />
+          <VehiclePanel fare={fare} setVehicleRidePanel={setVehicleRidePanel} setVehiclepanel={setVehiclepanel} setvehicleType={setvehicleType}  />
         </div>
 
         {/* ConfirmRidePanle */}
@@ -247,7 +277,7 @@ const Home = () => {
           <div className='mb-2'>
             <img className='w-3/5 mx-auto' src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_254,w_450/v1688398971/assets/29/fbb8b0-75b1-4e2a-8533-3a364e7042fa/original/UberSelect-White.png" alt="" />
           </div>
-          <ConfirmRidePanel setDriverFoundPanel={setDriverFoundPanel} setVehicleRidePanel={setVehicleRidePanel} />
+          <ConfirmRidePanel setDriverFoundPanel={setDriverFoundPanel} setVehicleRidePanel={setVehicleRidePanel} origin={origin} destination = {destination} fare={fare} vehicleType={vehicleType} createride={createride} />
         </div>
 
         {/* LookingForDriver Panel */}
@@ -256,7 +286,7 @@ const Home = () => {
           <div className='mb-2'>
             <img className='w-3/5 mx-auto' src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_254,w_450/v1688398971/assets/29/fbb8b0-75b1-4e2a-8533-3a364e7042fa/original/UberSelect-White.png" alt="" />
           </div>
-          <LookingForDriver />
+          <LookingForDriver origin={origin} destination = {destination} fare={fare} vehicleType={vehicleType}/>
         </div>
 
         {/* WaitingForDriver Panel */}

@@ -2,8 +2,6 @@ import React from 'react';
 import { MdLocationPin } from "react-icons/md";
 
 const LocationSearchPanel = ({
-  setVehiclepanel,
-  setpanleopen,
   suggestions,
   setpiclocation,
   setdestination,

@@ -25,7 +25,8 @@ const UserRegister = async (req, res) => {
                 lastname: lastname
             },
             email:email,
-            password: hash
+            password: hash,
+            socketid: null,
         });
 
         // Save the user to the database

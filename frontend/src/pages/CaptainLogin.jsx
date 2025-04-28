@@ -60,6 +60,7 @@ const CaptainLogin = () => {
         if(response.status === 201){
           const data = response.data
           const token = data.token
+          localStorage.setItem('CaptainId',data.captain._id)
           localStorage.setItem('captaintoken',token);
           setCaptainData(data);
           navigate('/captain-home')

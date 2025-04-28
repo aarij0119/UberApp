@@ -6,7 +6,10 @@ import cookieParser from 'cookie-parser';
 import { configDotenv } from 'dotenv';
 import { ExpressValidator } from 'express-validator';
 import mapsRoute from './routes/mapsroute.js'
+import initializedSocket from './socket.js';
+import http from 'http';
 const app = express();
+const server = http.createServer(app);
 DataBase()
 configDotenv()
 //routes
@@ -34,14 +37,14 @@ app.use('/users', userRoute);
 app.use('/captains', captainRoute);
 app.use('/maps', mapsRoute);
 app.use('/rides',rideRoute)
-
+initializedSocket(server);
 
 let Port = 3000
-app.listen(Port, (err) => {
+server.listen(Port, (err) => {
     if (err) {
         console.log("One error occured ", err.message)
     } else {
         console.log("Server is runnig on ", Port)
     }
 
-})
+});

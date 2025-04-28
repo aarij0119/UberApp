@@ -8,7 +8,7 @@ import { UserContextData } from '../Context/UserContext';
 
 const UserLogin = () => {
     const navigate = useNavigate();
-    const { setuserdata } = useContext(UserContextData);
+    const { setuserdata,setUserId } = useContext(UserContextData);
     const [formdata, setformdata] = useState({
         email: '',
         password: ''
@@ -58,6 +58,8 @@ const UserLogin = () => {
                 });
                 if (response.status === 200) {
                     const data = response.data;
+                    localStorage.setItem('UserId',data.User._id);
+                    setUserId(data.User._id)
                     localStorage.setItem('token', data.token);
                     setuserdata(data);
                     navigate('/home');

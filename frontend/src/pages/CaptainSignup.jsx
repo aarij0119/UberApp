@@ -99,6 +99,7 @@ const CaptainSignup = () => {
             if (response.status === 200) {
                 const data = response.data;
                 const token = data.token;
+                localStorage.setItem('CaptainId',data.createdcaptain._id)
                 localStorage.setItem('captaintoken', token);
                 setCaptainData(data);
                 navigate('/captain-home');
@@ -130,15 +131,15 @@ const CaptainSignup = () => {
   return (
 
     <div className='p-4'>
-      <div className='-ml-6 h-[4rem] mb-2'>
+      <div className='mb-2'>
         <Logo />
       </div>
       <div>
-        <form onSubmit={submithandler} className='flex flex-col gap-4 mb-5'>
-          <label className="font-bold text-base">What's your name</label>
+        <form onSubmit={submithandler} className='flex flex-col  gap-3 mb-5'>
+          <label className="font-bold text-base mt-2">What's your name</label>
           <span className='text-red-800 font-bold'>{formerrors.firstname}</span>
-          <div className='flex items-center gap-2'>
-            <div className='w-1/2'>
+          <div className='flex items-center gap-2 -mt-2'>
+            <div className='w-1/2 '>
               <input
                 className='bg-gray-200 p-4 w-full focus:outline-yellow-800 rounded'
                 type='text'
@@ -146,6 +147,7 @@ const CaptainSignup = () => {
                 onChange={changehandler}
                 value={formdata.firstname}
                 name='firstname'
+                autoComplete='off'
               />
             </div>
             <div className='w-1/2'>
@@ -155,6 +157,7 @@ const CaptainSignup = () => {
                 placeholder='Last Name'
                 onChange={changehandler}
                 value={formdata.lastname}
+                autoComplete='off'
                 name='lastname'
               />
             </div>
@@ -163,12 +166,13 @@ const CaptainSignup = () => {
             <label className='block  mb-2 font-bold text-base'>What's your email</label>
             <span className='text-red-800 font-bold'>{formerrors.email}</span>
             <input
-              className='bg-gray-200 p-4 w-full focus:outline-yellow-800 rounded'
+              className='bg-gray-200 p-4 w-full focus:outline-yellow-800 rounded lowercase'
               type='text'
               placeholder='example@gmail.com'
               onChange={changehandler}
               value={formdata.email}
               name='email'
+              autoComplete='off'
             />
           </div>
           <div>
@@ -181,6 +185,7 @@ const CaptainSignup = () => {
                 placeholder='password'
                 onChange={changehandler}
                 value={formdata.password}
+                autoComplete='off'
                 name='password'
               />
               <h4 onClick={showhandler} className='p-4 rounded-r bg-gray-200'>{hide ? <FaRegEye size={24} /> : <FaRegEyeSlash size={24} />}</h4>
@@ -197,6 +202,7 @@ const CaptainSignup = () => {
                 onChange={changehandler}
                 value={formdata.vehiclecolor}
                 name='vehiclecolor'
+                autoComplete='off'
               />
             </div>
             <div>
@@ -208,17 +214,19 @@ const CaptainSignup = () => {
                 onChange={changehandler}
                 value={formdata.vehiclecapacity}
                 name='vehiclecapacity'
+                autoComplete='off'
               />
             </div>
             <div>
               <span className='text-red-800 font-bold'>{formerrors.vehiclenumber}</span>
               <input
-                className='bg-gray-200 p-4 w-full focus:outline-yellow-800 rounded'
+                className='bg-gray-200 p-4 w-full focus:outline-yellow-800 rounded uppercase'
                 type='text'
                 placeholder='Vehicle Number'
                 onChange={changehandler}
                 value={formdata.vehiclenumber}
                 name='vehiclenumber'
+                autoComplete='off'
               />
             </div>
             <div>

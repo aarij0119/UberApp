@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react'
+import React, { createContext, useEffect, useState } from 'react'
 
 const UserContextData = createContext();
 const UserContext = ({ children }) => {
@@ -7,9 +7,13 @@ const UserContext = ({ children }) => {
         userfirstname:'',
         userlastname:''
     });
-    // console.log("User data is this ",userdata)
+    const [userId,setUserId] = useState();
+    useEffect(() => {
+       const userId = localStorage.getItem('UserId')
+      setUserId(userId)
+      }, [])
     return (
-        <UserContextData.Provider value={{userdata,setuserdata}}>
+        <UserContextData.Provider value={{userdata,setuserdata,setUserId,userId}}>
             {children}
         </UserContextData.Provider>
     )

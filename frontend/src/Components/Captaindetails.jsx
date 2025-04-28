@@ -1,15 +1,17 @@
-import React, { useRef, useState } from 'react'
+import React, { useContext, useRef, useState } from 'react'
 import { FaLocationDot } from "react-icons/fa6";
 import { RiTimer2Line } from "react-icons/ri";
 import { FaIndianRupeeSign } from "react-icons/fa6";
 import { IoIosTimer } from "react-icons/io";
 import { TbNotebook } from "react-icons/tb";
 import RidingPopUp from './RidingPopUp';
+// import { CaptainDataContext } from '../Context/CaptainContext';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import ConfirmRidePopupPanel from './ConfirmRidePopupPanel';
 
 const Captaindetails = () => {
+    // const {CaptainData} = useContext(CaptainDataContext)
     const [RidePopupPanel, setRidePopUpPanel] = useState(true);
     const [ConfirmRidePanel, setConfirmPanel] = useState(false);
     const RidePopUpPanelRef = useRef(null);

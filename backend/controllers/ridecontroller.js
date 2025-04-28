@@ -16,8 +16,7 @@ const createRidecontroller = async (req, res) => {
 };
 
 const getFareController = async (req,res) => {
-    const {picklocation, destination} = req.query;
-    const origin = picklocation;
+    const {origin, destination} = req.query;
     const response = await getFare(origin,destination);
     res.status(200).send(response)
 }

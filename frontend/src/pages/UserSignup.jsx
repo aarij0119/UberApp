@@ -6,7 +6,7 @@ import { FaRegEyeSlash } from "react-icons/fa";
 import axios from 'axios';
 import { UserContextData } from '../Context/UserContext';
 const UserSignup = () => {
-   const{setuserdata} = useContext(UserContextData);
+   const{setuserdata,setUserId} = useContext(UserContextData);
     const navigate = useNavigate();
     const [formdata, setformdata] = useState({
         firstname: '',
@@ -63,6 +63,8 @@ const UserSignup = () => {
                 });
                 if(response.status === 201){
                     const data = response.data
+                    localStorage.setItem('UserId',data.createdUser._id);
+                    setUserId(data.createdUser._id)
                     localStorage.setItem('token',data.token)
                     setuserdata(data.createdUser)
                     navigate('/home')
