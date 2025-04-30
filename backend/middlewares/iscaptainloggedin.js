@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken'
 import captainModel from '../models/captainModel.js';
 
-const iscptloggedin = async (req, res) => {
-    const token = req.cookies.token
+const iscptloggedin = async (req, res,next) => {
+    const token = req.cookies.token || req.headers.authorization
     if (!token) {
         return res.status(401).json({ message: "Login first" });
     }
@@ -13,7 +13,7 @@ const iscptloggedin = async (req, res) => {
             return res.status(400).json({ message: "captain not found" });
         }
         req.cptfind = cptfind;
-        return res.status(200).json({ message: "LoggedIn", isloggedin: true });
+        next();
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }

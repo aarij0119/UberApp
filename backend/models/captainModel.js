@@ -1,60 +1,62 @@
 import mongoose from "mongoose";
 
-const captainSchema =  mongoose.Schema({
-    fullname:{
-        firstname:{
-            type:String,
-            required:true,
+const captainSchema = mongoose.Schema({
+    fullname: {
+        firstname: {
+            type: String,
+            required: true,
         },
-        lastname:{
-            type:String
+        lastname: {
+            type: String
         }
     },
-    email:{
-        type:String,
-        required:true,
-        unique:true
+    email: {
+        type: String,
+        required: true,
+        unique: true
     },
-    password:{
-        type:String,
-        required:true,
-        // select:false
+    password: {
+        type: String,
+        required: true,
     },
-    socketId:{
-        type:String
+    socketId: {
+        type: String
     },
-    status:{
-        type:String,
-        enum:['active','inactive'],
+    status: {
+        type: String,
+        enum: ['active', 'inactive'],
         default: 'inactive'
     },
-    vehicle:{
-        color:{
-            type:String,
-            required:true
+    vehicle: {
+        color: {
+            type: String,
+            required: true
         }
     },
-    platenumber:{
-        type:String,
-        required:true
+    platenumber: {
+        type: String,
+        required: true
     },
-    capacity:{
-        type:Number,
-        required:true
+    capacity: {
+        type: Number,
+        required: true
     },
-    vehicleType:{
-        type:String,
-        required:true,
+    vehicleType: {
+        type: String,
+        required: true,
     },
-    location:{
-        lat:{
-            type:Number
+    location: {
+        ltd: {  // Latitude
+            type: Number
         },
-        lng:{
-            type:Number
+        lng: {  // Longitude
+            type: Number
         }
     }
 });
 
-const captainModel = mongoose.model('captain',captainSchema);
-export default captainModel
+// Add 2d index for legacy coordinate pairs
+captainSchema.index({ "location.lng": 1, "location.ltd": 1 }, { name: "location_2d" });
+
+const captainModel = mongoose.model('captain', captainSchema);
+export default captainModel;

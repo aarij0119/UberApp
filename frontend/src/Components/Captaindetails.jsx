@@ -5,14 +5,13 @@ import { FaIndianRupeeSign } from "react-icons/fa6";
 import { IoIosTimer } from "react-icons/io";
 import { TbNotebook } from "react-icons/tb";
 import RidingPopUp from './RidingPopUp';
-// import { CaptainDataContext } from '../Context/CaptainContext';
+import { CaptainDataContext } from '../Context/CaptainContext';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import ConfirmRidePopupPanel from './ConfirmRidePopupPanel';
 
-const Captaindetails = () => {
-    // const {CaptainData} = useContext(CaptainDataContext)
-    const [RidePopupPanel, setRidePopUpPanel] = useState(true);
+const Captaindetails = ({Ride, RidePopupPanel, setRidePopUpPanel,confirmRide}) => {
+    const {CaptainData} = useContext(CaptainDataContext);
     const [ConfirmRidePanel, setConfirmPanel] = useState(false);
     const RidePopUpPanelRef = useRef(null);
     const ConfirmRidePopUpPanelRef = useRef(null);
@@ -38,14 +37,14 @@ const Captaindetails = () => {
                 y: '100%'
             })
         }
-    },[ConfirmRidePanel])
+    }, [ConfirmRidePanel])
     return (
         <div>
             <div className='p-3'>
                 <div className='mb-2 flex justify-between p-2'>
                     <div className='flex items-center gap-3'>
                         <img className='w-16 rounded-full' src="https://unavatar.io/github/1stevengrant" alt="" />
-                        <h2 className='text-2xl font-bold'>Aarij</h2>
+                        <h2 className='text-2xl font-bold'>Riyaz</h2>
                     </div>
                     <div className='flex justify-end items-center flex-col'>
                         <h1 className='flex items-center text-2xl font-bold'><FaIndianRupeeSign />295.20</h1>
@@ -74,10 +73,10 @@ const Captaindetails = () => {
                 </div>
             </div>
             <div ref={RidePopUpPanelRef} className='fixed bottom-0 w-full bg-white p-3 transform translate-y-full'>
-                <RidingPopUp setRidePopUpPanel={setRidePopUpPanel} setConfirmPanel={setConfirmPanel} />
+                <RidingPopUp confirmRide={confirmRide} Ride={Ride} setRidePopUpPanel={setRidePopUpPanel} setConfirmPanel={setConfirmPanel} />
             </div>
             <div ref={ConfirmRidePopUpPanelRef} className='fixed bottom-0 w-full h-screen bg-white p-3 pt-8 transform'>
-                <ConfirmRidePopupPanel setConfirmPanel={setConfirmPanel} />
+                <ConfirmRidePopupPanel Ride={Ride} setConfirmPanel={setConfirmPanel} />
             </div>
         </div>
 

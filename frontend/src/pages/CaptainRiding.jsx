@@ -3,8 +3,11 @@ import gsap from 'gsap';
 import React, { useRef, useState } from 'react'
 import { FaChevronUp } from "react-icons/fa";
 import FinishRidePanel from '../Components/FinishRidePanel';
+import { useLocation } from 'react-router-dom';
 
 const CaptainRiding = () => {
+  const location = useLocation();
+  const rideData = location.state?.Ride
   const[FinishRidePopUp,setFinishRidePopUp] = useState(false);
   const FinishRidePoppanelRef = useRef(null);
   useGSAP(function(){
@@ -18,6 +21,7 @@ const CaptainRiding = () => {
       })
     }
   },[FinishRidePopUp])
+  
   return (
     <div className='h-screen'>
       <div className='w-full h-[80%] bg-red-400'>
@@ -31,7 +35,7 @@ const CaptainRiding = () => {
         </div>
       </div>
       <div ref={FinishRidePoppanelRef}  className='fixed bottom-0 bg-white w-full p-4 transform translate-y-full'>
-        <FinishRidePanel setFinishRidePopUp={setFinishRidePopUp}/>
+        <FinishRidePanel rideData={rideData} setFinishRidePopUp={setFinishRidePopUp}/>
       </div>
     </div>
   )

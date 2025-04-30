@@ -52,7 +52,7 @@ const LiveTracking = () => {
         <MapContainer
           center={location}
           zoom={14}
-          style={{ height: "100%", width: "100%", position: "relative", zIndex: 10 }}
+          style={{ height: "100%", width: "100%", zIndex: -1, }}
           className="leaflet-container"
           whenCreated={(map) => (mapRef.current = map)} 
         >

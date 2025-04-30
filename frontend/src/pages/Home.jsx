@@ -5,7 +5,7 @@ import gsap from "gsap";
 import axios from 'axios'
 
 //Context
-import {SocketContext} from '../Context/SocketContext'
+import { SocketContext } from '../Context/SocketContext'
 import { UserContextData } from '../Context/UserContext';
 
 //Components
@@ -14,8 +14,12 @@ import VehiclePanel from '../Components/VehiclePanel';
 import ConfirmRidePanel from '../Components/ConfirmRidePanel';
 import LookingForDriver from '../Components/LookingForDriver';
 import WaitingForDriver from '../Components/WaitingForDriver';
+import { useNavigate } from 'react-router-dom';
+import LiveTracking from '../Components/LiveTracking';
 
 const Home = () => {
+  LiveTracking
+  const navigate = useNavigate();
   const [origin, setpiclocation] = useState('');
   const [destination, setdestination] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -24,6 +28,23 @@ const Home = () => {
   const [VehicleRidePanel, setVehicleRidePanel] = useState(false);
   const [DriverFoundPanel, setDriverFoundPanel] = useState(false);
   const [WaitingDriverPanel, setWaitingPanel] = useState(false);
+  const [rideStartdata, setrideStartdata] = useState({
+    captain: {
+      fullname: {
+        firstname: '',
+        lastname: '',
+      },
+      platenumber: '',
+      vehicle: {
+        color: ''
+      },
+      vehicleType: '',
+      origin: '',
+      destination: '',
+      fare: '',
+      otp: ''
+    }
+  });
   const [vehicleType, setvehicleType] = useState('')
   const [fare, setfare] = useState('')
   const [Ispick, setIspic] = useState(true);
@@ -36,16 +57,57 @@ const Home = () => {
   const DriverFoundRef = useRef(null);
   const WaitingDriverPanelRef = useRef(null);
 
-  
-const  {socket}= useContext(SocketContext);
-const {userId} = useContext(UserContextData)
 
-useEffect(()=>{
-  if(userId){
-    // console.log("got userdat",userId)
+  const { socket } = useContext(SocketContext);
+  const { userId } = useContext(UserContextData)
+
+  useEffect(() => {
+    if (userId) {
+      // console.log("got userdat",userId)
+    }
+    socket.emit('join', { userType: 'user', userId: userId });
+  })
+  socket.on('ride-confirmed', (ride) => {
+    setrideStartdata(ride)
+    setWaitingPanel(true)
+    setDriverFoundPanel(false)
+  });
+
+  socket.on('ride-start', (ride) => {
+    setWaitingPanel(false);
+    navigate('/riding', { state: { ride } })
+  })
+
+  async function findtrip() {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/getfare`, {
+      params: { origin, destination },
+      withCredentials: true,
+      headers: {
+        Authorization: `${localStorage.getItem('token')}`
+      }
+    })
+    const data = response.data;
+    setfare(data);
+    // setpiclocation('');
+    // setdestination('');
+    setpanleopen(false);
+    setVehiclepanel(true);
+
   }
-  socket.emit('join',{userType:'user',userId:userId})
-})
+  async function createride() {
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create`, {
+      origin,
+      destination,
+      vehicleType
+    },
+      {
+        withCredentials: true,
+        Authorization: `${localStorage.getItem('token')}`
+      }
+    )
+    console.log(response)
+  }
+
   let timeout = null;
   const debounce = (callback, delay) => {
     clearTimeout(timeout);
@@ -101,8 +163,6 @@ useEffect(()=>{
 
     debounce(() => fetchSuggestions(query, "destination"), 300);
   };
-
-
 
   useGSAP(function () {
     if (ispanelopen) {
@@ -174,46 +234,15 @@ useEffect(()=>{
     }
   }, [WaitingDriverPanel])
 
-  async function findtrip() {
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/getfare`, {
-      params: { origin, destination },
-      withCredentials: true,
-      headers: {
-        Authorization: `${localStorage.getItem('token')}`
-      }
-    })
-    const data = response.data;
-    setfare(data);
-    // setpiclocation('');
-    // setdestination('');
-    setpanleopen(false);
-    setVehiclepanel(true);
-
-  }
-
-  async function createride() {
-   const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create`, {
-      origin,
-      destination,
-      vehicleType
-    },
-    
-      {
-        withCredentials:true,
-        Authorization: `${localStorage.getItem('token')}`
-      }
 
 
-    )
-    console.log(response)
-  }
   return (
+    
     <div className='w-full h-screen'>
-      <img className='w-20 object-cover fixed top-4 left-3' src='https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png' />
-      <div className='w-full h-full'>
-        <img className='h-full w-full object-cover' src="https://cdn.dribbble.com/userupload/22910073/file/original-f308c35778d329518ef2b88f866111ec.gif" alt="" />
+      <div className="h-[60%] z-[10]">
+        <LiveTracking className='w-full h-full bg-cover' />
       </div>
-      <div className='flex flex-col justify-end absolute bottom-0 w-full h-full'>
+      <div className='flex flex-col justify-end absolute bottom-0 w-full h-full '>
         <div className='w-full h-[40%] bg-white px-3 '>
           <div className='mb-4 flex items-center justify-between'>
             <h4 className='text-2xl font-bold mt-3'>Find a trip</h4>
@@ -265,7 +294,7 @@ useEffect(()=>{
             <h2 className='text-2xl font-bold'>Choose a vehicle Type</h2>
             <IoIosArrowDown className='opacity-0' onClick={() => { setVehiclepanel(false) }} ref={arrowref} size={22} />
           </div>
-          <VehiclePanel fare={fare} setVehicleRidePanel={setVehicleRidePanel} setVehiclepanel={setVehiclepanel} setvehicleType={setvehicleType}  />
+          <VehiclePanel fare={fare} setVehicleRidePanel={setVehicleRidePanel} setVehiclepanel={setVehiclepanel} setvehicleType={setvehicleType} />
         </div>
 
         {/* ConfirmRidePanle */}
@@ -277,7 +306,7 @@ useEffect(()=>{
           <div className='mb-2'>
             <img className='w-3/5 mx-auto' src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_254,w_450/v1688398971/assets/29/fbb8b0-75b1-4e2a-8533-3a364e7042fa/original/UberSelect-White.png" alt="" />
           </div>
-          <ConfirmRidePanel setDriverFoundPanel={setDriverFoundPanel} setVehicleRidePanel={setVehicleRidePanel} origin={origin} destination = {destination} fare={fare} vehicleType={vehicleType} createride={createride} />
+          <ConfirmRidePanel setDriverFoundPanel={setDriverFoundPanel} setVehicleRidePanel={setVehicleRidePanel} origin={origin} destination={destination} fare={fare} vehicleType={vehicleType} createride={createride} />
         </div>
 
         {/* LookingForDriver Panel */}
@@ -286,7 +315,7 @@ useEffect(()=>{
           <div className='mb-2'>
             <img className='w-3/5 mx-auto' src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_254,w_450/v1688398971/assets/29/fbb8b0-75b1-4e2a-8533-3a364e7042fa/original/UberSelect-White.png" alt="" />
           </div>
-          <LookingForDriver origin={origin} destination = {destination} fare={fare} vehicleType={vehicleType}/>
+          <LookingForDriver origin={origin} destination={destination} fare={fare} vehicleType={vehicleType} />
         </div>
 
         {/* WaitingForDriver Panel */}
@@ -294,12 +323,15 @@ useEffect(()=>{
           <div className='mb-2 flex justify-between'>
             <img className='w-28' src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_254,w_450/v1688398971/assets/29/fbb8b0-75b1-4e2a-8533-3a364e7042fa/original/UberSelect-White.png" alt="" />
             <div className='text-right'>
-              <h1 className='text-xl font-bold -mb-1'>Muhammad</h1>
-              <h2 className='text-xl font-bold -mb-1 -mt-1'>CH 0 1 BL 2213</h2>
-              <h3 className='text-base'>Maruti Suzuki, Alto</h3>
+              <h1 className='text-xl font-bold -mb-1'>
+                {rideStartdata?.captain?.fullname?.firstname}
+              </h1>
+              <h2 className='text-lg font-bold -mb-1 -mt-1 uppercase'>{rideStartdata?.captain?.platenumber}</h2>
+              <h3 className='text-sm uppercase'>{rideStartdata?.captain?.vehicleType} <span className='text-black font-bold'>Color</span> {rideStartdata?.captain?.vehicle?.color}</h3>
+              <h2 className='text-lg font-bold -mb-1 -mt-1 uppercase'>OTP : {rideStartdata?.otp}</h2>
             </div>
           </div>
-          <WaitingForDriver />
+          <WaitingForDriver rideStartdata={rideStartdata} />
         </div>
       </div>
     </div>

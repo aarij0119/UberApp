@@ -1,4 +1,5 @@
 import axios from 'axios';
+import captainModel from '../models/captainModel.js';
 
 const validateAddress = async (address) => {
   if (!address) {
@@ -12,8 +13,8 @@ const validateAddress = async (address) => {
       const location = response.data.hits[0];
       return {
         formattedAddress: location.name,
-        latitude: location.point.lat,
-        longitude: location.point.lng
+        ltd: location.point.lat,
+        lng: location.point.lng
       };
     } else {
       throw new Error("Address details not found");
@@ -54,5 +55,37 @@ const getDistanceAndTime = async ({ origin, destination }) => {
   }
 };
 
-export { getDistanceAndTime }
+const getCaptainsInRadius = async (location) => {
+  try {
+    // 1. First try to find EXACT location match
+    const exactMatchCaptains = await captainModel.find({
+      "location.ltd": location.ltd,
+      "location.lng": location.lng,
+      status: 'active'
+    });
+
+    if (exactMatchCaptains.length > 0) {
+      return exactMatchCaptains[0]; // Return first matching captain
+    }
+
+    // 2. If no exact match, find ANY active captain
+    const anyCaptain = await captainModel.findOne({
+      status: 'active',
+      "location.ltd": { $exists: true },
+      "location.lng": { $exists: true },
+    });
+
+    if (anyCaptain) {
+      return anyCaptain;
+    }
+    return null;
+
+  } catch (error) {
+    console.error("Error finding captain:", error);
+    return null;
+  }
+};
+
+
+export { getDistanceAndTime, getCaptainsInRadius }
 export default validateAddress;

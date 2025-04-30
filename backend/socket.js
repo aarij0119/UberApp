@@ -7,17 +7,16 @@ function initializedSocket(server) {
         cors: {
             origin: "*",
             methods: ['GET', 'POST'],
+            credentials:true
         },
     });
 
     io.on("connection", (socket) => {
-        console.log("Client Connected:", socket.id);
+        // console.log("Client Connected:", socket.id);
 
         socket.on("join", async (data) => {
             try {
-                console.log(data)
                 const { userId, userType } = data;
-                console.log(userId)
                 const updateData = { socketid: socket.id };
                 if (userType === "user") {
                     await UserModel.findByIdAndUpdate(userId, updateData, { new: true });
@@ -28,19 +27,42 @@ function initializedSocket(server) {
                 console.error("Error updating socket ID:", error);
             }
         });
-
+            socket.on('update-location-captain',async (data)=>{
+                const{userId,location} = data
+                if(!location || !location.ltd || !location.lng){
+                    return socket.emit('error',{message:'Invalid Location data'})
+                }
+                await captainModel.findByIdAndUpdate(userId,{
+                    location:{
+                        ltd:location.ltd,
+                        lng:location.lng
+                    }
+                })
+            })
         socket.on("disconnect", () => {
-            console.log("Client Disconnected:", socket.id);
+            // console.log("Client Disconnected:", socket.id);
         });
     });
-
-    function SendMessage(socketId, message) {
-        if (io) {
-            io.to(socketId).emit('message', message)
-        }else{
-            console.log("io is not defined")
+}
+    function SendMessage(socketId, messageObject) {
+        if (!io) {
+            console.error("Socket.IO not initialized");
+            return false;
+        }
+    
+        if (!socketId) {
+            console.error("No socketId provided");
+            return false;
+        }
+    
+        try {
+            io.to(socketId).emit(messageObject.event, messageObject.data);
+            return true;
+        } catch (error) {
+            console.error("Message sending failed:", error);
+            return false;
         }
     }
-}
 
-export default initializedSocket;
+export {SendMessage}    
+export default initializedSocket
